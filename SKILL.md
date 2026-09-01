@@ -1,6 +1,6 @@
 ---
 name: interview-review
-description: Use when the user wants to create an interview review (面试复盘) document from an interview recording transcript plus a job description (JD). Triggers on requests like "面试复盘", "帮我复盘这次面试", "生成面试复盘文档", "interview review", "复盘文档". Produces a structured retrospective that lists every interviewer question (no omissions), marks each as 【新话题】 or 【追问】 with follow-up chains, scores each answer, and turns gaps into an action plan against the JD.
+description: Use when the user wants to create an interview review (面试复盘) document from an interview recording transcript plus a job description (JD). Triggers on requests like "面试复盘", "帮我复盘这次面试", "生成面试复盘文档", "interview review", "复盘文档". Produces a structured retrospective that lists every interviewer question (no omissions), marks each as 【新话题】 or 【追问】 with follow-up chains, scores each answer, generates standard answers plus extended knowledge points (延申知识点) for every weakly-answered question, and turns gaps into an action plan against the JD.
 ---
 
 # 面试复盘（Interview Review）
@@ -10,7 +10,7 @@ description: Use when the user wants to create an interview review (面试复盘
 把一次面试的**录音转文字（逐字稿）+ 岗位 JD**，转成一份结构化的复盘文档。
 
 核心原则只有一条：**复盘的价值不在"记录发生了什么"，而在"指出下次该改什么"。**
-每一处失分都要落到「标准答案 + 可执行动作」，不停留在"这里答得不好"。
+每一处失分都要落到「标准回答 + 延申知识点 + 可执行动作」，不停留在"这里答得不好"。
 
 ## 输入要求（Required Inputs）
 
@@ -41,7 +41,12 @@ description: Use when the user wants to create an interview review (面试复盘
 1. **标签**（【新话题】/【追问·承 Q 几】）
 2. **我的回答**（还原现场，如实，不美化）
 3. **评分**（三档，见下"评分标准"）
-4. **标准答案 + 补强**（告诉用户"正确的是什么 + 下次怎么答"，这是复盘的核心价值）
+4. **标准回答 + 延申知识点**（告诉用户"正确的是什么 + 下次怎么答"，这是复盘的核心价值）
+
+**硬性规则（回答不好的题）**：评分 ⭐（明显卡壳或错误）或 ⭐⭐（有方向但浅）的问题，必须单独输出「**标准回答**」和「**延申知识点**」两个独立小节，不能只写一句"这里答得不好"：
+- **标准回答**：假设面试官再问一次，候选人应该怎么答——写成可直接背诵/口述的完整段落，包含正确术语、API/命令、关键数据，必要时附代码片段。
+- **延申知识点**：该题相关的相邻考点（二面最可能顺着追问的下一层问题），逐条列出，每条给"一句话要点"，不做长篇展开；覆盖深度以"能扛住面试官顺着这个方向再追问一轮"为准。
+- 评分 ⭐⭐⭐ 的问题也鼓励补"延申知识点"把扎实升级为满分（标准回答可略）。
 
 ### Step 5 — 分类
 按**知识领域**给题目分组（如 CUDA/GPU、Linux 驱动、内存管理、内核裁剪、OS/多线程、C 语言、处理器经验、背景核实、实习规划等）。分类用于"逐题复盘"的呈现维度，与"脉络总览"的时间序并存。
@@ -50,6 +55,7 @@ description: Use when the user wants to create an interview review (面试复盘
 - **亮点线**：哪些答得好、该保持。
 - **短板线**：按失分严重度排 P0/P1/P2，明确指出"下一轮最危险的地方"。
 - **差距 + 行动线**：对照 JD 逐条看缺口，落到"二面前 / 终面前 / 入职前"的具体清单。
+- **结论先行**：把亮点线和短板线收敛成一份「结论先行」，放在文档**最开头**——具体到题号，明确「哪些题答得好、为什么好」「哪些题答得不好、为什么不好、下次怎么避免」。这是复盘文档里用户最该先看的部分。
 
 ### Step 7 — 生成文档
 按下方"输出文档结构"写出完整 Markdown 复盘文档，保存到约定位置。
@@ -84,9 +90,19 @@ description: Use when the user wants to create an interview review (面试复盘
 
 > 复盘人 / 复盘日期 / 面试形式 / 面试时长 / 面试官
 
+## 结论先行（先看这个）
+
+### ✅ 回答得好的问题（为什么好）
+- 具体到题号，每题一句"好在哪"（框架清晰 / 数据完整 / 底层原理到位 / 诚实应对等）。
+
+### ❌ 回答得不好的问题（为什么不好 + 下次怎么避免）
+- 具体到题号，每题两行：① 为什么不好（一句话定性）② 下次怎么避免（可执行动作，不停留于"多练"）。
+
+---
+
 ## 一、面试基本信息（表格：岗位 / 公司 / 部门业务 / 轮次 / 后续流程 / 面试官口径）
 
-## 二、总体评价（先看结论）
+## 二、总体评价
 一句话结论 + 亮点 ✅ + 短板 ⚠️（3~4 条）
 
 ## 三、自我介绍复盘
@@ -100,7 +116,8 @@ description: Use when the user wants to create an interview review (面试复盘
 **A{序号}（=Q{全局序号}）{问题}【类型】** {评分}
 - 我的回答：...
 - 评价：...
-- 标准答案/补强：...
+- 标准回答：...（⭐⭐ 及以下必写，可直接背诵口述）
+- 延申知识点：...（⭐⭐ 及以下必写，逐条一句话要点）
 
 ## 六、表现亮点（值得保持）
 
